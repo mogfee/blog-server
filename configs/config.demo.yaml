@@ -1,0 +1,33 @@
+Server:
+  RunModel: debug
+  HttpPort: 8000
+  ReadTimeout: 60
+  WriteTimeout: 60
+App:
+  ServerName: blog-server
+  DefaultPageSize: 10
+  MaxPageSize: 100
+  LogSavePath: storage/logs
+  LogFileName: app
+  LogFileExt: .log
+Database:
+  DBType: mysql
+  Username: root
+  Password: 123456
+  Host: localhost
+  DBName: article
+  TablePrefix: blog_
+  Charset: utf8mb4
+  ParseTime: True
+  MaxIdleConns: 10
+  MaxOpenConns: 30
+  ConnMaxLifetime: 30
+Jaeger:
+  Host: xxx.xxx.xxx.xxx
+  Port: 6831
+Monitor:
+  SystemEmailUser: "xxx@126.com"
+  SystemEmailPass: "xxx"
+  SystemEmailHost: "smtp.126.com"
+  SystemEmailPort: 465
+  ErrorNotifyUser: "xxx@126.com"

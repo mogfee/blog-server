@@ -1,0 +1,4 @@
+storage/
+.idea
+test/
+configs/config.yaml
