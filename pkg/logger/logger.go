@@ -124,11 +124,18 @@ func (l *Logger) JSONFormat(message string) map[string]interface{} {
 	return data
 }
 
-func (l *Logger) WithTrace(span opentracing.Span) *Logger {
+func (l *Logger) WithTrace() *Logger {
+	if l.ctx == nil {
+		return l
+	}
+	span := opentracing.SpanFromContext(l.ctx)
+	if span == nil {
+		return l
+	}
 	if sc, ok := span.Context().(jaeger.SpanContext); ok {
 		return l.WithFields(Fields{
-			"trace_id": sc.TraceID(),
-			"span_id":  sc.SpanID(),
+			"trace_id": sc.TraceID().String(),
+			"span_id":  sc.SpanID().String(),
 		})
 	}
 	return l
@@ -154,40 +161,40 @@ func (l *Logger) OutPut(message string) {
 }
 
 func (l *Logger) Debug(v ...interface{}) {
-	l.WithLevel(LevelDebug).OutPut(fmt.Sprint(v...))
+	l.WithLevel(LevelDebug).WithTrace().OutPut(fmt.Sprint(v...))
 }
 
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	l.WithLevel(LevelDebug).OutPut(fmt.Sprintf(format, v...))
+	l.WithLevel(LevelDebug).WithTrace().OutPut(fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Info(v ...interface{}) {
-	l.WithLevel(LevelInfo).OutPut(fmt.Sprint(v...))
+	l.WithLevel(LevelInfo).WithTrace().OutPut(fmt.Sprint(v...))
 }
 
 func (l *Logger) Infof(format string, v ...interface{}) {
-	l.WithLevel(LevelInfo).OutPut(fmt.Sprintf(format, v...))
+	l.WithLevel(LevelInfo).WithTrace().OutPut(fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Error(v ...interface{}) {
-	l.WithLevel(LevelError).OutPut(fmt.Sprint(v...))
+	l.WithLevel(LevelError).WithTrace().OutPut(fmt.Sprint(v...))
 }
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	l.WithLevel(LevelError).OutPut(fmt.Sprintf(format, v...))
+	l.WithLevel(LevelError).WithTrace().OutPut(fmt.Sprintf(format, v...))
 }
 
 func (l *Logger) Fatal(v ...interface{}) {
-	l.WithLevel(LevelFatal).OutPut(fmt.Sprint(v...))
+	l.WithLevel(LevelFatal).WithTrace().OutPut(fmt.Sprint(v...))
 }
 
 func (l *Logger) Fatalf(format string, v ...interface{}) {
-	l.WithLevel(LevelFatal).OutPut(fmt.Sprintf(format, v...))
+	l.WithLevel(LevelFatal).WithTrace().OutPut(fmt.Sprintf(format, v...))
 }
 func (l *Logger) Panic(v ...interface{}) {
-	l.WithLevel(LevelPanic).OutPut(fmt.Sprint(v...))
+	l.WithLevel(LevelPanic).WithTrace().OutPut(fmt.Sprint(v...))
 }
 
 func (l *Logger) Panicf(format string, v ...interface{}) {
-	l.WithLevel(LevelPanic).OutPut(fmt.Sprintf(format, v...))
+	l.WithLevel(LevelPanic).WithTrace().OutPut(fmt.Sprintf(format, v...))
 }

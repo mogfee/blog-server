@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/mogfee/blog-server/global"
 	logger2 "github.com/mogfee/blog-server/pkg/logger"
-	"github.com/opentracing/opentracing-go"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/utils"
 	"log"
@@ -106,20 +105,15 @@ func (l *mylogger) Error(ctx context.Context, msg string, data ...interface{}) {
 }
 
 func (l *mylogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "sql")
-	defer span.Finish()
-
 	if l.LogLevel > 0 {
 		elapsed := time.Since(begin)
 		sql, rows := fc()
-		span.SetBaggageItem("sql", sql)
 		if err != nil {
-			span.SetTag("error", err)
-			global.Logger.WithTrace(span).WithFields(logger2.Fields{
+			global.Logger.WithContext(ctx).WithFields(logger2.Fields{
 				"error": err.Error(),
 			}).Error(sql)
 		} else {
-			global.Logger.WithTrace(span).Debug(sql)
+			global.Logger.WithContext(ctx).Debug(sql)
 		}
 		switch {
 		case err != nil && l.LogLevel >= logger.Error:

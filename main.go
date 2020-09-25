@@ -93,7 +93,7 @@ func setupLogger() error {
 	} else {
 		out = os.Stdout
 	}
-	global.Logger = logger.NewLogger(out, "", log.LstdFlags).WithCaller(0)
+	global.Logger = logger.NewLogger(out, "", log.LstdFlags)
 	return nil
 }
 func setupTracer() error {

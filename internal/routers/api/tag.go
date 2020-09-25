@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mogfee/blog-server/global"
+	"github.com/mogfee/blog-server/internal/model"
 	"github.com/mogfee/blog-server/internal/service"
 	"github.com/mogfee/blog-server/pkg/app"
 	"github.com/mogfee/blog-server/pkg/errcode"
@@ -21,19 +22,12 @@ func (c TagController) Get(ctx *gin.Context) {
 func (c TagController) List(ctx *gin.Context) {
 }
 
-type TagControllerCreateSwagger struct {
-	Name  string `json:"name" bind:"require"`
-	State int64  `json:"state"`
-}
-
 func (c TagController) Create(ct *gin.Context) {
-	//通用
 	ginWap := app.NewGinWap(ct)
 	span, ctx := ginWap.StartSpanFromContext("添加标签控制器")
 	defer span.Finish()
 	ginWap.SetSpan(span)
-
-	post := TagControllerCreateSwagger{}
+	post := model.TagControllerCreateSwagger{}
 	if err := ginWap.Bind(&post); err != nil {
 		ginWap.ToErrorResponse(errcode.InvalidParams.WithDetails(err.Error()))
 		return
@@ -45,13 +39,12 @@ func (c TagController) Create(ct *gin.Context) {
 		State: post.State,
 	})
 	if err != nil {
-		ginWap.ToErrorResponse(errcode.ServerError.WithDetails(err.Error()))
+		ginWap.ToErrorResponse(err)
 		return
 	}
 	ginWap.ToResponse(gin.H{
 		"id": res.Id,
 	})
-
 }
 func (c TagController) Update(ctx *gin.Context) {
 

@@ -46,6 +46,7 @@ func (r *response) Bind(data interface{}) error {
 	return nil
 }
 func (r *response) StartSpanFromContext(operationName string) (opentracing.Span, context.Context) {
+
 	spanContext, ok := r.Ctx.Get("tracer_span")
 	if ok {
 		sp := spanContext.(*jaeger.Span)
@@ -73,25 +74,36 @@ func (r *response) ToResponseList(list interface{}, totalRows int) {
 			TotalRows: totalRows,
 		},
 	}
-
-	{
-		//span, _ := r.StartSpanFromContext("response_list")
-		r.spanCtx.SetTag("error", false)
-		r.spanCtx.SetBaggageItem("resp", fmt.Sprintf("%+v", resp))
-	}
+	r.spanCtx.SetTag("error", false)
+	r.spanCtx.SetBaggageItem("resp", fmt.Sprintf("%+v", resp))
 	r.Ctx.JSON(http.StatusOK, resp)
 }
 
-func (r *response) ToErrorResponse(err *errcode.Error) {
+func (r *response) ToErrorResponse(e error) {
+	var err = &errcode.Error{}
+	switch e.(type) {
+	case *errcode.Error:
+		err = e.(*errcode.Error)
+	default:
+		err = errcode.ServerError.WithDetails(e.Error())
+	}
 	resp := gin.H{"code": err.Code(), "msg": err.Msg()}
 	details := err.Details()
 	if len(details) > 0 {
 		resp["details"] = details
 	}
-	{
-		//span, _ := r.StartSpanFromContext("response_error")
-		r.spanCtx.SetTag("error", true)
-		r.spanCtx.SetBaggageItem("resp", fmt.Sprintf("%+v", resp))
-	}
+	r.spanCtx.SetTag("error", true)
+	r.spanCtx.SetBaggageItem("resp", fmt.Sprintf("%+v", resp))
 	r.Ctx.JSON(err.StatusCode(), resp)
 }
+
+//func (r *response) ToErrorResponse(err *errcode.Error) {
+//	resp := gin.H{"code": err.Code(), "msg": err.Msg()}
+//	details := err.Details()
+//	if len(details) > 0 {
+//		resp["details"] = details
+//	}
+//	r.spanCtx.SetTag("error", true)
+//	r.spanCtx.SetBaggageItem("resp", fmt.Sprintf("%+v", resp))
+//	r.Ctx.JSON(err.StatusCode(), resp)
+//}
